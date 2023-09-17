@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import matplotlib.transforms as mtransforms
+import pandas as pd
 
 
 #nsv_jack = [5,8,10,16,20,32,40,64,128]
@@ -59,21 +60,22 @@ for idx, nsv in enumerate(nsv_jack):
 
 ##############################################################################
 
-nsv_jack = [16,32]
-for idx, nsv in enumerate(nsv_jack):
-    if (nsv==16):njack='16_3'
-    if (nsv==32):njack='32_3'
+fit_range = [1]#,2]
+for idx, fr in enumerate(fit_range):
+    if (fr==1):fitrange='25_150'
+    if (fr==2):fitrange='60_160'
 
-    file = np.genfromtxt('../../get_env/n_density/test_jackknife/files/pycorr_z0_nd3_00_xi_jkn_'+str(nsv)+'_3_r_70_150.dat')
+    file = np.genfromtxt('../../RascalC/output/nd3_00/pycorr_z0_nd3_00_xi_jkn_8_3_r_'+str(fitrange)+'.dat')
+    cov_rascalc = np.genfromtxt('../../RascalC/output/nd3_00/cov_matrix_RascalC_z0_nd3_00_r_'+str(fitrange)+'_10x.dat')
+    fit_maxl = np.genfromtxt('../output/2pcf_auto_z0/nd3_00/rascalc_r_'+str(fitrange)+'/r_'+str(fitrange)+'_rascalc_10x_model_maxlike.dat')
 
     r = file[:,0]
     xi = file[:, 1]
-    err = file[:, 2]
+    err = np.sqrt(np.diag(cov_rascalc))
     err2=r**2*(err)
-    err_max=max(err)
 
     # r vs xi
-    ax2.errorbar(r, r**2*xi, yerr=err2, color='C'+str(idx),linestyle='None',label='2pcf njack='+str(njack))
+    ax2.errorbar(r, r**2*xi, yerr=err2, color='C'+str(idx),linestyle='None',label='2pcf range='+str(fitrange))
     ax2.plot(r, r**2 * xi, marker='o', color='gray') #all
     y=r**2*xi
     ax2.set_xlim(30,160)
@@ -81,92 +83,118 @@ for idx, nsv in enumerate(nsv_jack):
     ax2.set_ylabel(r'$r^2 \xi(r)$')
     ax2.set_xlabel(r'$r \, [h^{-1}Mpc]$')
 
-    fit = np.genfromtxt('../output/2pcf_auto_z0/nd3_00/r_70_150_njack_'+str(njack)+'_model_mean.dat')
-    ii=np.where((fit[:,0]<160) & (fit[:,0]>30)) 
-    rfit = fit[:,0][ii]
-    xifit = fit[:,1][ii]
-   # ax2.plot(rfit,rfit**2 * xifit, label='fit mean_'+str(njack),  marker='.')
-    fit = np.genfromtxt('../output/2pcf_auto_z0/nd3_00/r_70_150_njack_'+str(njack)+'_model_maxlike.dat')
-    ii=np.where((fit[:,0]<160) & (fit[:,0]>60)) 
-    rfit = fit[:,0][ii]
-    xifit = fit[:,1][ii]
-    ax2.plot(rfit,rfit**2 * xifit, color='C'+str(idx))
 
+    rfit = fit_maxl[:,0]
+    xifit = fit_maxl[:,1]
+    ax2.plot(rfit,rfit**2 * xifit, label='fit maxlike_'+str(fitrange),color='C'+str(idx))
 
     ax2.legend(loc = 'lower left')
 
 ##############################################################################
+########## Plot alpha ################
 
-################  nd 3_00 #####################################
-#r [70,150]
-nsv = [5,8]#,16,32]
-alpha = [0.989143850825359605E+00, 0.992579667578962876E+00]#, 0.989571947419984332E+00, 0.992715844972345218E+00]
-err_alpha=[0.202165423187788892E-01, 0.267253423780814681E-01]#, 0.279428107113747597E-01, 0.290501070335324532E-01]
-#alpha_b = [0.992408728702855347E+00, 0.993032250003943573E+00, 0.990075834142475908E+00, 0.989737408453017831E+00]
-#err_alpha_b=[0.556673755356241898E-03, 0.392508390765457769E-03, 0.580331000206931041E-01, 0.626432407655688195E-01]
-ax3.errorbar(nsv, alpha, yerr=err_alpha, label='[70,150]', fmt="o", color='C0')
-#ax3.errorbar(nsv, alpha_b, yerr=err_alpha_b)
-
+####  nd 3_00 pycorr ##################
 #r [60,160]
-nsv = [5.1,8.1]
-al = [0.989174560697012484E+00,0.986222170079396609E+00]
+#nsv = [5^3,8^3]
+al = [0.989174560697012484E+00,0.986222170079396609E+00] 
 err_al = [0.170585367196523369E-01, 0.242586733709745095E-01]
-ax3.errorbar(nsv, al, yerr=err_al, label='[60,160]', fmt="o", color='C1')
+xx= [1,2]
+ax3.errorbar(xx[0], al[0], yerr=err_al[0], label='pycorr 5^3: [60,160]', fmt="o", color='C1')
+ax3.errorbar(xx[1], al[1], yerr=err_al[1], label='pycorr 8^3: [60,160]', fmt="o", color='C2')
 
-#r [30,170]
-nsv = [5.2,8.2]
-alpha = [0.100318535020550192E+01, 0.969332891858893042E+00]
-err_alpha=[0.133753250647854118E-01, 0.278153174915375875E-01]
-ax3.errorbar(nsv, al, yerr=err_al, label='[30,170]', fmt="o", color='C2')
 
-#r [20,200]
-#nsv = [5.3,8.3]
-#al = [0.990635309405448305E+00, 0.982193544173814215E+00]
-#err_al = [0.144496747707993211E-01, 0.180450521405499976E-01]
-#ax3.errorbar(nsv, al, yerr=err_al, label='[20,200]', fmt="o")
-##############################################################
 
 ################  nd 2_00 #####################################
-#r [50,170]
-#nsv = [6,9]
-#al = [, ]
-#err_al = [, ]
-#ax3.errorbar(nsv, al, yerr=err_al, label='[20,200]', fmt="o", color='C0')
-
 #r [60,160]
-nsv = [6.1,9.1]
+#nsv = [5^3,8^3]
 al = [0.996468238219410996E+00, 0.993100703781965910E+00]
 err_al = [0.152699988503018653E-01, 0.194684800204054931E-01]
-ax3.errorbar(nsv, al, yerr=err_al, fmt="o", color='C1')
+xx= [6,7]
+ax3.errorbar(xx[0], al[0], yerr=err_al[0], fmt="o", color='C1')
+ax3.errorbar(xx[1], al[1], yerr=err_al[1], fmt="o", color='C2')
 
-#r [30,170]
-nsv = [6.2,9.2]
-al = [0.100042660535782346E+01, 0.995615692767555127E+00]
-err_al = [0.151209974711211340E-01, 0.196172723467254034E-01]
-ax3.errorbar(nsv, al, yerr=err_al, fmt="o", color='C2')
 
-#r [20,200]
-#nsv = [6.3,9.3]
-#al = [, ]
-#err_al = [, ]
-#ax3.errorbar(nsv, al, yerr=err_al, label='[20,200]', fmt="o")
 ##############################################################
 
 
-################  nd 0_00 #####################################
-#r [50,170]
-nsv = [7,10]
-al = [0.992304286801488078E+00, 0.992111505908539026E+00]
-err_al = [0.816717341227586125E-03, 0.494559243681163998E-03]
-#ax3.errorbar(nsv, al, yerr=err_al, fmt="o", color='C0')
 
-#create chart 
-#ax3.bar(x = np.arange (len (al)), height = al, yerr = err_al, width = 0.5)
-#ax3.set_xticks([r for r in range(len(al))], ['5^3', '8^3'])
 
-ax3.legend(loc='center')
 
-ax3.set_ylim(0.95,1.03)
+############ read alpha + error BAOflit
+
+def Convert(string):
+    li = list(string.split("   "))
+    return li
+
+
+#/r_60_160
+#10x
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_60_160/r_60_160_rascalc_10x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(3, al_rc, yerr=err_al_rc, label='rascal: nd3_00 [60,160]', fmt="o", color='k')
+#5x
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_60_160/r_60_160_rascalc_5x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(3.1, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+#2x
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_60_160/r_60_160_rascalc_2x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(3.2, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+#1x
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_60_160/r_60_160_rascalc_1x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(3.3, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+
+
+#/r_25_150
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_25_150/r_25_150_rascalc_10x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(4, al_rc, yerr=err_al_rc, label='rascal: nd3_00 [25,150]', fmt="o", color='y')
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_25_150/r_25_150_rascalc_5x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(4.1, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_25_150/r_25_150_rascalc_2x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(4.2, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/rascalc_r_25_150/r_25_150_rascalc_1x_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(4.3, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+
+
+
+
+ax3.set_ylim(0.90,1.10)
+ax3.set_xlim(0,10)
+ax3.axhline(1.0 ,linestyle='dotted')
+ax3.axvline(5.0 ,linestyle='dotted')
+ax3.legend(loc='lower right', fontsize=8)
+ax3.text(0.3,1.05,"nd3_00", bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))
+ax3.text(5.3,1.05,"nd2_00", bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))
+
 #plt.savefig('../../plots_nden/test_fit_model_nd3_00.png')
 
 plt.show()
