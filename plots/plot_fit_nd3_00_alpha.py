@@ -60,7 +60,7 @@ for idx, nsv in enumerate(nsv_jack):
 
 ##############################################################################
 
-fit_range = [1]#,2]
+fit_range = [2]#,1]
 for idx, fr in enumerate(fit_range):
     if (fr==1):fitrange='25_150'
     if (fr==2):fitrange='60_160'
@@ -68,6 +68,7 @@ for idx, fr in enumerate(fit_range):
     file = np.genfromtxt('../../RascalC/output/nd3_00/pycorr_z0_nd3_00_xi_jkn_8_3_r_'+str(fitrange)+'.dat')
     cov_rascalc = np.genfromtxt('../../RascalC/output/nd3_00/cov_matrix_RascalC_z0_nd3_00_r_'+str(fitrange)+'_10x.dat')
     fit_maxl = np.genfromtxt('../output/2pcf_auto_z0/nd3_00/rascalc_r_'+str(fitrange)+'/r_'+str(fitrange)+'_rascalc_10x_model_maxlike.dat')
+    fit_maxl2 = np.genfromtxt('../output/2pcf_auto_z0/nd3_00/gauss_r_'+str(fitrange)+'/r_'+str(fitrange)+'_gauss_model_maxlike.dat')
 
     r = file[:,0]
     xi = file[:, 1]
@@ -87,6 +88,9 @@ for idx, fr in enumerate(fit_range):
     rfit = fit_maxl[:,0]
     xifit = fit_maxl[:,1]
     ax2.plot(rfit,rfit**2 * xifit, label='fit maxlike_'+str(fitrange),color='C'+str(idx))
+    rfit = fit_maxl2[:,0]
+    xifit = fit_maxl2[:,1]
+    ax2.plot(rfit,rfit**2 * xifit, label='Gauss fit maxlike_'+str(fitrange),color='m')
 
     ax2.legend(loc = 'lower left')
 
@@ -107,6 +111,7 @@ x6=5.1
 x8=8.9
 x9=9.1
 x10=10.
+x11=10.1
 
 def Convert(string):
     li = list(string.split("   "))
@@ -142,6 +147,15 @@ a, b, alpha, error_alpha = Convert(str1)
 al_rc=float(alpha)
 err_al_rc=float(error_alpha)
 ax3.errorbar(x3+0.3, al_rc, yerr=err_al_rc, fmt="o", color='gray')
+
+#gauss
+stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/gauss_r_60_160/r_60_160_gauss_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(x3+0.4, al_rc, yerr=err_al_rc, fmt="o", color='magenta')
+
 
 #pycorr
 stats = pd.read_csv('../output/2pcf_auto_z0/nd3_00/r_60_160_njack_125_stats.dat')
@@ -228,10 +242,25 @@ a, b, alpha, error_alpha = Convert(str1)
 al_rc=float(alpha)
 err_al_rc=float(error_alpha)
 ax3.errorbar(x10, al_rc, yerr=err_al_rc, fmt="o", color='g')
-
-
-
-
+#Gauss
+stats = pd.read_csv('../output/2pcf_auto_z0/total/total_r_60_160_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(x11, al_rc, yerr=err_al_rc, fmt="o", color='m')
+stats = pd.read_csv('../output/2pcf_auto_z0/total/total_r_60_1600_tapp_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(x11+0.1, al_rc, yerr=err_al_rc, fmt="o", color='y')
+stats = pd.read_csv('../output/2pcf_auto_z0/total/total_r_60_160_tapp_c_stats.dat')
+str1 = stats.iloc[2,0]
+a, b, alpha, error_alpha = Convert(str1)
+al_rc=float(alpha)
+err_al_rc=float(error_alpha)
+ax3.errorbar(x11+0.2, al_rc, yerr=err_al_rc, fmt="o", color='r')
 
 ax3.set_ylim(0.90,1.10)
 ax3.axhline(1.0 ,linestyle='dotted')
